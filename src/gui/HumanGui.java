@@ -65,7 +65,7 @@ public class HumanGui {
       BigInteger signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
       debugResponseArea.append("Decrypted your part of the blind signed vote as: " + Arrays.toString(blindSignedVote) + "\n");
       try {
-        bulletinBoard.acceptAndZKPVote(signedVote, voter);
+        bulletinBoard.acceptAndZKPVote(signedVote, encryptedVote, voter);
       } catch (BulletinBoardError error) {
         debugResponseArea.append(error.getMessage());
         return;

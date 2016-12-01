@@ -61,7 +61,7 @@ public class ElectionBoard {
       System.out.println("Made key for candidate #"+i);
     }
     KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-    kpg.initialize(2048);
+    kpg.initialize(128);
     KeyPair kp = kpg.genKeyPair();
     RSAPublicKey rpuk = (RSAPublicKey)kp.getPublic();
     RSAPrivateKey rprk = (RSAPrivateKey)kp.getPrivate();
