@@ -1,12 +1,18 @@
+import java.math.BigInteger;
+
 /**
  * Created by james on 11/30/16.
  */
 public class Voter {
-  public long[] encryptForBlindSign(long[] encryptedVote) {
-    return new long[encryptedVote.length];
+
+  public Voter() {
   }
 
-  public long[] partiallyBlindSignedVote(long[] blindSignedVote) {
-    return new long[blindSignedVote.length];
+  public BigInteger[] encryptForBlindSign(BigInteger[] encryptedVote) {
+    return new BigInteger[encryptedVote.length];
+  }
+
+  public BigInteger[] partiallyBlindSignedVote(BigInteger[] blindSignedVote) {
+    return new BigInteger[blindSignedVote.length];
   }
 }

@@ -3,6 +3,8 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import static javax.swing.JOptionPane.showMessageDialog;
@@ -12,7 +14,7 @@ import static javax.swing.JOptionPane.showMessageDialog;
  */
 public class HumanGui {
   private JPanel contentPane;
-  private JComboBox voteBox;
+  private JComboBox<String> voteBox;
   private JButton voteButton;
   private JTextField nameField;
   private JTextField ageField;
@@ -22,7 +24,11 @@ public class HumanGui {
   private final ElectionBoard electionBoard = new ElectionBoard();
   private final BulletinBoard bulletinBoard = new BulletinBoard(electionBoard);
 
-  public HumanGui() {
+  public HumanGui() throws NoSuchAlgorithmException {
+    voteBox.addItem("Select a Candidate:");
+    for (int i = 0; i < electionBoard.candidates.length; i++) {
+      voteBox.addItem(electionBoard.candidates[i]);
+    }
     clearButton.addActionListener(e -> {
       voteBox.setEnabled(true);
       nameField.setEditable(true);
@@ -37,28 +43,31 @@ public class HumanGui {
     });
     voteButton.addActionListener(e -> {
       if (!validate()) return;
-      long plainVote[] = new long[voteBox.getItemCount()];
-      plainVote[voteBox.getSelectedIndex()] = 1;
+      BigInteger plainVote[] = new BigInteger[electionBoard.candidates.length];
+      for (int i = 0; i < plainVote.length; i++) {
+        plainVote[i] = BigInteger.ZERO;
+      }
+      plainVote[voteBox.getSelectedIndex() - 1] = BigInteger.ONE;
       debugResponseArea.setText("Plaintext vote is: " + Arrays.toString(plainVote) + "\n");
-      long encryptedVote[] = voter.encryptForBlindSign(plainVote);
-      debugResponseArea.setText("Vote encrypted to: " + Arrays.toString(encryptedVote) + "\n");
-      long blindSignedVote[];
+      BigInteger encryptedVote[] = voter.encryptForBlindSign(plainVote);
+      debugResponseArea.append("Vote encrypted to: " + Arrays.toString(encryptedVote) + "\n");
+      BigInteger blindSignedVote[];
       try {
         blindSignedVote = electionBoard.blindSignVote(nameField.getText(), Integer.parseInt(ageField.getText()), encryptedVote);
       } catch (ElectionBoardError error) {
         debugResponseArea.append(error.getMessage());
         return;
       }
-      debugResponseArea.setText("Election Board successfully signed your vote as: " + Arrays.toString(blindSignedVote) + "\n");
-      long signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
-      debugResponseArea.setText("Decrypted your part of the blind signed vote as: " + Arrays.toString(blindSignedVote) + "\n");
+      debugResponseArea.append("Election Board successfully signed your vote as: " + Arrays.toString(blindSignedVote) + "\n");
+      BigInteger signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
+      debugResponseArea.append("Decrypted your part of the blind signed vote as: " + Arrays.toString(blindSignedVote) + "\n");
       try {
         bulletinBoard.acceptAndZKPVote(signedVote, voter);
       } catch (BulletinBoardError error) {
         debugResponseArea.append(error.getMessage());
         return;
       }
-      debugResponseArea.setText("Bulletin Board received and challenged your vote successfully.\n");
+      debugResponseArea.append("Bulletin Board received and challenged your vote successfully.\n");
       voteBox.setEnabled(false);
       nameField.setEditable(false);
       ageField.setEditable(false);
@@ -67,7 +76,7 @@ public class HumanGui {
   }
 
   private boolean validate() {
-    if (voteBox.getSelectedIndex() == -1) {
+    if (voteBox.getSelectedIndex() <= 0) {
       showMessageDialog(contentPane, "You must select a candidate to vote.", "No Candidate Selected", JOptionPane.ERROR_MESSAGE);
       return false;
     }
@@ -93,7 +102,7 @@ public class HumanGui {
     return true;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws NoSuchAlgorithmException {
     JFrame frame = new JFrame("HumanGui");
     frame.setContentPane(new HumanGui().contentPane);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
