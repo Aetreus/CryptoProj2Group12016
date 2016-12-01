@@ -1,0 +1,6 @@
+Bob     21
+Alice   28
+Steve   35
+Malice  42
+John    49
+Tim     56

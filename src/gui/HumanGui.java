@@ -3,6 +3,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -21,13 +22,15 @@ public class HumanGui {
   private JButton clearButton;
   private JTextArea debugResponseArea;
   private Voter voter = new Voter();
-  private final ElectionBoard electionBoard = new ElectionBoard();
-  private final BulletinBoard bulletinBoard = new BulletinBoard(electionBoard);
+  private final ElectionBoard electionBoard;
+  private final BulletinBoard bulletinBoard;
 
-  public HumanGui() throws NoSuchAlgorithmException {
+  public HumanGui(String voterFile, String candidatesFile) throws NoSuchAlgorithmException, IOException {
+    electionBoard = new ElectionBoard(voterFile, candidatesFile);
+    bulletinBoard = new BulletinBoard(electionBoard);
     voteBox.addItem("Select a Candidate:");
-    for (int i = 0; i < electionBoard.candidates.length; i++) {
-      voteBox.addItem(electionBoard.candidates[i]);
+    for (int i = 0; i < electionBoard.candidates.size(); i++) {
+      voteBox.addItem(electionBoard.candidates.get(i));
     }
     clearButton.addActionListener(e -> {
       voteBox.setEnabled(true);
@@ -43,7 +46,7 @@ public class HumanGui {
     });
     voteButton.addActionListener(e -> {
       if (!validate()) return;
-      BigInteger plainVote[] = new BigInteger[electionBoard.candidates.length];
+      BigInteger plainVote[] = new BigInteger[electionBoard.candidates.size()];
       for (int i = 0; i < plainVote.length; i++) {
         plainVote[i] = BigInteger.ZERO;
       }
@@ -102,9 +105,13 @@ public class HumanGui {
     return true;
   }
 
-  public static void main(String[] args) throws NoSuchAlgorithmException {
+  public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+    if (args.length != 2) {
+      System.err.println("usage: HumanGui voters.txt candidates.txt");
+      System.exit(-1);
+    }
     JFrame frame = new JFrame("HumanGui");
-    frame.setContentPane(new HumanGui().contentPane);
+    frame.setContentPane(new HumanGui(args[0], args[1]).contentPane);
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.pack();
     frame.setVisible(true);

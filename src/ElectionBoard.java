@@ -1,17 +1,21 @@
 import paillierp.Paillier;
 import paillierp.key.KeyGen;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by james on 11/30/16.
  */
 public class ElectionBoard {
-  public final String candidates[]=new String[]{"Bernie","Hillary","Deez Nuts","Trump (The Hearthstone streamer)"};
-  private final Paillier keyHolders[]=new Paillier[candidates.length];
+  private final Paillier keyHolders[];
+  public final List<String> candidates;
+  private final HashMap<String,Integer> voters=new HashMap<>();
   public static Random random;
 
   static {
@@ -22,13 +26,30 @@ public class ElectionBoard {
     }
   }
 
-  public ElectionBoard() throws NoSuchAlgorithmException {
-    for (int i = 0; i < candidates.length; i++) {
-      System.out.println("Make key for candidate "+i);
-      keyHolders[i]=new Paillier(KeyGen.PaillierKey(128,random.nextLong()));
-      System.out.println("Make key for candidate "+i);
+  public ElectionBoard(String voterFile, String candidatesFile) throws NoSuchAlgorithmException, IOException {
+    try(BufferedReader fReader=new BufferedReader(new FileReader(voterFile))){
+      String line;
+      while((line=fReader.readLine())!=null&&!(line=line.trim()).isEmpty()){
+        String[] split = line.split("\\s+");
+        if(split.length!=2){
+          throw new IOException("The voter file had line \""+line+"\" which lacked whitespace between voter name and age.");
+        }
+        voters.put(split[0],Integer.parseInt(split[1]));
+      }
     }
-    System.out.println("Donezo");
+    ArrayList<String> tmp=new ArrayList<>();
+    try(BufferedReader fReader=new BufferedReader(new FileReader(candidatesFile))){
+      String line;
+      while((line=fReader.readLine())!=null&&!(line=line.trim()).isEmpty()&&!tmp.contains(line)){
+        tmp.add(line);
+      }
+    }
+    candidates=Collections.unmodifiableList(tmp);
+    keyHolders=new Paillier[candidates.size()];
+    for (int i = 0; i < candidates.size(); i++) {
+      keyHolders[i]=new Paillier(KeyGen.PaillierKey(128,random.nextLong()));
+      System.out.println("Made key for candidate #"+i);
+    }
   }
   public BigInteger[] blindSignVote(String voterName, int voterAge, BigInteger[] encryptedVote) throws ElectionBoardError{
     if(!voterOfNameExists(voterName)){
@@ -40,10 +61,10 @@ public class ElectionBoard {
     if(!voterHasAge(voterName,voterAge)){
       throw new ElectionBoardError("There is no voter of name \"" + voterName + "\" of age "+voterAge+".");
     }
-    if(encryptedVote.length != candidates.length){
-      throw new ElectionBoardError("This vote is for " + encryptedVote.length + " candidates but there are really "+candidates.length+" candidates.");
+    if(encryptedVote.length != candidates.size()){
+      throw new ElectionBoardError("This vote is for " + encryptedVote.length + " candidates but there are really "+candidates.size()+" candidates.");
     }
-    BigInteger blindSignedVote[]=new BigInteger[candidates.length];
+    BigInteger blindSignedVote[]=new BigInteger[candidates.size()];
     for (int i = 0; i < keyHolders.length; i++) {
       blindSignedVote[0]= keyHolders[i].encrypt(encryptedVote[i]);
     }
@@ -51,10 +72,10 @@ public class ElectionBoard {
   }
 
   private boolean voterHasAge(String voterName, int voterAge) {
-    return true;
+    return voterAge==voters.get(voterName);
   }
 
   private boolean voterOfNameExists(String voterName) {
-    return true;
+    return voters.containsKey(voterName);
   }
 }
