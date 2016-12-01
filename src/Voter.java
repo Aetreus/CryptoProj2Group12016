@@ -8,10 +8,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Voter {
 
-  public Voter() {
-  }
-
-  public final ElectionBoard electionBoard;
+  private ElectionBoard electionBoard;
   private BigInteger r;
   public static Random random;
   

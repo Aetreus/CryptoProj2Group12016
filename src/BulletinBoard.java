@@ -11,7 +11,7 @@ public class BulletinBoard {
     board = electionBoard;
   }
 
-  public void acceptAndZKPVote(BigInteger[] signedVote, BigInteger[] encryptedVote Voter voter) throws BulletinBoardError{
+  public void acceptAndZKPVote(BigInteger[] signedVote, BigInteger[] encryptedVote, Voter voter) throws BulletinBoardError{
     
   }
 }

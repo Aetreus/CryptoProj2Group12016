@@ -21,13 +21,14 @@ public class HumanGui {
   private JTextField ageField;
   private JButton clearButton;
   private JTextArea debugResponseArea;
-  private Voter voter = new Voter();
+  private Voter voter;
   private final ElectionBoard electionBoard;
   private final BulletinBoard bulletinBoard;
 
   public HumanGui(String voterFile, String candidatesFile) throws NoSuchAlgorithmException, IOException {
     electionBoard = new ElectionBoard(voterFile, candidatesFile);
     bulletinBoard = new BulletinBoard(electionBoard);
+    voter = new Voter(electionBoard);
     voteBox.addItem("Select a Candidate:");
     for (int i = 0; i < electionBoard.candidates.size(); i++) {
       voteBox.addItem(electionBoard.candidates.get(i));
