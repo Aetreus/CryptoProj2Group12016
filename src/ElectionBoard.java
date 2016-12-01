@@ -18,6 +18,7 @@ import java.util.*;
  */
 public class ElectionBoard {
   private final Paillier keyHolders[];
+  public final Pallier publicEncryption[];
   public final List<String> candidates;
   private final HashMap<String,Integer> voters=new HashMap<>();
   public static Random random;
@@ -56,6 +57,7 @@ public class ElectionBoard {
     keyHolders=new Paillier[candidates.size()];
     for (int i = 0; i < candidates.size(); i++) {
       keyHolders[i]=new Paillier(KeyGen.PaillierKey(128,random.nextLong()));
+      publicEncryption[i] = new Paillier(keyHolders[i].getPublicKey());
       System.out.println("Made key for candidate #"+i);
     }
     KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");

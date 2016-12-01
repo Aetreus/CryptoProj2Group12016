@@ -42,7 +42,7 @@ public class HumanGui {
       ageField.setText("");
       voteButton.setEnabled(true);
       debugResponseArea.setText("");
-      voter = new Voter();
+      voter = new Voter(electionBoard);
     });
     voteButton.addActionListener(e -> {
       if (!validate()) return;
@@ -52,11 +52,11 @@ public class HumanGui {
       }
       plainVote[voteBox.getSelectedIndex() - 1] = BigInteger.ONE;
       debugResponseArea.setText("Plaintext vote is: " + Arrays.toString(plainVote) + "\n");
-      BigInteger encryptedVote[] = voter.encryptForBlindSign(plainVote);
+      BigInteger encryptedVote[] = voter.encryptVote(plainVote);
       debugResponseArea.append("Vote encrypted to: " + Arrays.toString(encryptedVote) + "\n");
       BigInteger blindSignedVote[];
       try {
-        blindSignedVote = electionBoard.blindSignVote(nameField.getText(), Integer.parseInt(ageField.getText()), encryptedVote);
+        blindSignedVote = electionBoard.blindSignVote(nameField.getText(), Integer.parseInt(ageField.getText()), voter.encryptForBlindSign(encryptedVote));
       } catch (ElectionBoardError error) {
         debugResponseArea.append(error.getMessage());
         return;
