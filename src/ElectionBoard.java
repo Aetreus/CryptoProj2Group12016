@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.KeyPair;
 import java.util.*;
 
 /**
@@ -17,6 +21,10 @@ public class ElectionBoard {
   public final List<String> candidates;
   private final HashMap<String,Integer> voters=new HashMap<>();
   public static Random random;
+  
+  public final BigInteger modulus;
+  private final BigInteger privateExponent;
+  public final BigInteger publicExponent;
 
   static {
     try {
@@ -50,6 +58,14 @@ public class ElectionBoard {
       keyHolders[i]=new Paillier(KeyGen.PaillierKey(128,random.nextLong()));
       System.out.println("Made key for candidate #"+i);
     }
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+    kpg.initialize(2048);
+    KeyPair kp = kpg.genKeyPair();
+    RSAPublicKey rpuk = (RSAPublicKey)kp.getPublic();
+    RSAPrivateKey rprk = (RSAPrivateKey)kp.getPrivate();
+    modulus = rpuk.getModulus();
+    publicExponent = rpuk.getPublicExponent();
+    privateExponent = rprk.getPrivateExponent();
   }
   public BigInteger[] blindSignVote(String voterName, int voterAge, BigInteger[] encryptedVote) throws ElectionBoardError{
     if(!voterOfNameExists(voterName)){
@@ -66,7 +82,7 @@ public class ElectionBoard {
     }
     BigInteger blindSignedVote[]=new BigInteger[candidates.size()];
     for (int i = 0; i < keyHolders.length; i++) {
-      blindSignedVote[0]= keyHolders[i].encrypt(encryptedVote[i]);
+      blindSignedVote[i]= encryptedVote[i].modPow(privateExponent,modulus);
     }
     return blindSignedVote;
   }
