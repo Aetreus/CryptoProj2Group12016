@@ -79,12 +79,12 @@ public class Voter {
   public BigInteger getZKPV(BigInteger e,int i){
     BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
     BigInteger NSquared = N.pow(2);
-    return zkpr.add(e.multiply(plainVote[i])).mod(NSquared);
+    return zkpr.subtract(e.multiply(plainVote[i])).mod(NSquared);
   }
   
   public BigInteger getZKPW(BigInteger e,int i){
     BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
     BigInteger NSquared = N.pow(2);
-    return zkps.multiply(encryptRands[i].modPow(e,NSquared)).mod(NSquared);
+    return zkps.multiply(encryptRands[i].modPow(e.modInverse(NSquared),NSquared)).mod(NSquared);
   }
 }

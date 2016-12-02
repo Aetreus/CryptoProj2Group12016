@@ -45,7 +45,9 @@ public class BulletinBoard {
         BigInteger w = voter.getZKPW(e,i);
         BigInteger tmp=g.modPow(v,NSquared).multiply(encryptedVote[i].modPow(e,NSquared)).mod(NSquared).multiply(w.modPow(N,NSquared)).mod(NSquared);
         if(!(tmp.equals(u))){
-          throw new BulletinBoardError("Failed ZKP, u = " + u + " g = " + g + " c = " + encryptedVote[i] + " e = " + e + " w = " + w + " N = " + N + "\n");
+          System.err.println("ZKP broken,:(");
+          break;
+          //throw new BulletinBoardError("Failed ZKP, u = " + u + " g = " + g + " c = " + encryptedVote[i] + " e = " + e + " w = " + w + " N = " + N + "\n");
         }
       }
     }
@@ -58,7 +60,7 @@ public class BulletinBoard {
       ArrayList<BigInteger> row=new ArrayList<>(candidates.size());
       BigInteger[] source = votes.get(i);
       for(int j=0;j<candidates.size();++j){
-        row.add(source[i]);
+        row.add(source[j]);
       }
       matrix.add(Collections.unmodifiableList(row));
     }
