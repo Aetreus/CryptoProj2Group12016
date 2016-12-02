@@ -5,12 +5,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.KeyPair;
 import java.util.*;
 
 /**
@@ -62,7 +62,7 @@ public class ElectionBoard {
       System.out.println("Made key for candidate #"+i);
     }
     KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-    kpg.initialize(128);
+    kpg.initialize(512);
     KeyPair kp = kpg.genKeyPair();
     RSAPublicKey rpuk = (RSAPublicKey)kp.getPublic();
     RSAPrivateKey rprk = (RSAPrivateKey)kp.getPrivate();

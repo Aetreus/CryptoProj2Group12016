@@ -6,7 +6,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -52,9 +51,9 @@ public class HumanGui {
         plainVote[i] = BigInteger.ZERO;
       }
       plainVote[voteBox.getSelectedIndex() - 1] = BigInteger.ONE;
-      debugResponseArea.setText("Plaintext vote is: " + Arrays.toString(plainVote) + "\n");
+      debugResponseArea.setText("Plaintext vote is:\n" + arrayToBlockString(plainVote) + "\n");
       BigInteger encryptedVote[] = voter.encryptVote(plainVote);
-      debugResponseArea.append("Vote encrypted to: " + Arrays.toString(encryptedVote) + "\n");
+      debugResponseArea.append("Vote encrypted to:\n" + arrayToBlockString(encryptedVote) + "\n");
       BigInteger blindSignedVote[];
       try {
         blindSignedVote = electionBoard.blindSignVote(nameField.getText(), Integer.parseInt(ageField.getText()), voter.encryptForBlindSign(encryptedVote));
@@ -62,9 +61,9 @@ public class HumanGui {
         debugResponseArea.append(error.getMessage());
         return;
       }
-      debugResponseArea.append("Election Board successfully signed your vote as: " + Arrays.toString(blindSignedVote) + "\n");
+      debugResponseArea.append("Election Board successfully signed your vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
       BigInteger signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
-      debugResponseArea.append("Decrypted your part of the blind signed vote as: " + Arrays.toString(blindSignedVote) + "\n");
+      debugResponseArea.append("Decrypted your part of the blind signed vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
       try {
         bulletinBoard.acceptAndZKPVote(signedVote, encryptedVote, voter);
       } catch (BulletinBoardError error) {
@@ -77,6 +76,16 @@ public class HumanGui {
       ageField.setEditable(false);
       voteButton.setEnabled(false);
     });
+  }
+
+  private String arrayToBlockString(BigInteger array[]) {
+    if (array.length == 0) return "\t[]";
+    StringBuilder sb = new StringBuilder("\t[");
+    for (int i = 0; i < array.length; i++) {
+      sb.append(array[i]).append(",\n\t");
+    }
+    sb.replace(sb.length() - 3, sb.length(), "]");
+    return sb.toString();
   }
 
   private boolean validate() {

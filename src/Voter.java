@@ -1,10 +1,7 @@
-import paillierp.Paillier;
-import paillierp.zkp.EncryptionZKP;
-
 import java.math.BigInteger;
-import java.util.Random;
-import java.security.SecureRandom;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
 
 /**
  * Created by james on 11/30/16.
@@ -44,6 +41,7 @@ public class Voter {
   
   public BigInteger[] encryptVote(BigInteger[] plaintextVote)  {
     plainVote = plaintextVote;
+    encryptRands=new BigInteger[plaintextVote.length];
     BigInteger[] encryptedVote = new BigInteger[plaintextVote.length];
     for(int i = 0; i < plaintextVote.length; i++)  {
       BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
