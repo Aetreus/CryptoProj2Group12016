@@ -21,6 +21,7 @@ public class ElectionBoard {
   public final Paillier publicEncryption[];
   public final List<String> candidates;
   private final HashMap<String,Integer> voters=new HashMap<>();
+  private final HashSet<String> votedVoters=new HashSet<>();
   public static Random random;
   
   public final BigInteger modulus;
@@ -82,6 +83,9 @@ public class ElectionBoard {
     }
     if(encryptedVote.length != candidates.size()){
       throw new ElectionBoardError("This vote is for " + encryptedVote.length + " candidates but there are really "+candidates.size()+" candidates.");
+    }
+    if(!votedVoters.add(voterName)){
+      throw new ElectionBoardError("This voter has attempted to vote multiple times.");
     }
     BigInteger blindSignedVote[]=new BigInteger[candidates.size()];
     for (int i = 0; i < keyHolders.length; i++) {
