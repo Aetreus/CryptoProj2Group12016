@@ -20,6 +20,7 @@ public class HumanGui {
   private JTextField ageField;
   private JButton clearButton;
   private JTextArea debugResponseArea;
+  private JButton finishElectionButton;
   private Voter voter;
   private final ElectionBoard electionBoard;
   private final BulletinBoard bulletinBoard;
@@ -32,50 +33,64 @@ public class HumanGui {
     for (int i = 0; i < electionBoard.candidates.size(); i++) {
       voteBox.addItem(electionBoard.candidates.get(i));
     }
-    clearButton.addActionListener(e -> {
-      voteBox.setEnabled(true);
-      nameField.setEditable(true);
-      ageField.setEditable(true);
-      voteButton.setEnabled(true);
-      voteBox.setSelectedIndex(-1);
-      nameField.setText("");
-      ageField.setText("");
-      voteButton.setEnabled(true);
-      debugResponseArea.setText("");
-      voter = new Voter(electionBoard);
-    });
-    voteButton.addActionListener(e -> {
-      if (!validate()) return;
-      BigInteger plainVote[] = new BigInteger[electionBoard.candidates.size()];
-      for (int i = 0; i < plainVote.length; i++) {
-        plainVote[i] = BigInteger.ZERO;
-      }
-      plainVote[voteBox.getSelectedIndex() - 1] = BigInteger.ONE;
-      debugResponseArea.setText("Plaintext vote is:\n" + arrayToBlockString(plainVote) + "\n");
-      BigInteger encryptedVote[] = voter.encryptVote(plainVote);
-      debugResponseArea.append("Vote encrypted to:\n" + arrayToBlockString(encryptedVote) + "\n");
-      BigInteger blindSignedVote[];
-      try {
-        blindSignedVote = electionBoard.blindSignVote(nameField.getText(), Integer.parseInt(ageField.getText()), voter.encryptForBlindSign(encryptedVote));
-      } catch (ElectionBoardError error) {
-        debugResponseArea.append(error.getMessage());
-        return;
-      }
-      debugResponseArea.append("Election Board successfully signed your vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
-      BigInteger signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
-      debugResponseArea.append("Decrypted your part of the blind signed vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
-      try {
-        bulletinBoard.acceptAndZKPVote(signedVote, encryptedVote, voter);
-      } catch (BulletinBoardError error) {
-        debugResponseArea.append(error.getMessage());
-        return;
-      }
-      debugResponseArea.append("Bulletin Board received and challenged your vote successfully.\n");
-      voteBox.setEnabled(false);
-      nameField.setEditable(false);
-      ageField.setEditable(false);
-      voteButton.setEnabled(false);
-    });
+    clearButton.addActionListener(e -> clear());
+    voteButton.addActionListener(e -> vote());
+    finishElectionButton.addActionListener(e -> results());
+    finishElectionButton.setEnabled(true);
+  }
+
+  private void clear() {
+    voteBox.setEnabled(true);
+    nameField.setEditable(true);
+    ageField.setEditable(true);
+    voteButton.setEnabled(true);
+    voteBox.setSelectedIndex(-1);
+    nameField.setText("");
+    ageField.setText("");
+    voteButton.setEnabled(true);
+    debugResponseArea.setText("");
+    voter = new Voter(electionBoard);
+  }
+
+  private void vote() {
+    if (!validate()) return;
+    BigInteger plainVote[] = new BigInteger[electionBoard.candidates.size()];
+    for (int i = 0; i < plainVote.length; i++) {
+      plainVote[i] = BigInteger.ZERO;
+    }
+    plainVote[voteBox.getSelectedIndex() - 1] = BigInteger.ONE;
+    debugResponseArea.setText("Plaintext vote is:\n" + arrayToBlockString(plainVote) + "\n");
+    BigInteger encryptedVote[] = voter.encryptVote(plainVote);
+    debugResponseArea.append("Vote encrypted to:\n" + arrayToBlockString(encryptedVote) + "\n");
+    BigInteger blindSignedVote[];
+    try {
+      blindSignedVote = electionBoard.blindSignVote(nameField.getText(), Integer.parseInt(ageField.getText()), voter.encryptForBlindSign(encryptedVote));
+    } catch (ElectionBoardError error) {
+      debugResponseArea.append(error.getMessage());
+      return;
+    }
+    debugResponseArea.append("Election Board successfully signed your vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
+    BigInteger signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
+    debugResponseArea.append("Decrypted your part of the blind signed vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
+    try {
+      bulletinBoard.acceptAndZKPVote(signedVote, encryptedVote, voter);
+    } catch (BulletinBoardError error) {
+      debugResponseArea.append(error.getMessage());
+      return;
+    }
+    debugResponseArea.append("Bulletin Board received and challenged your vote successfully.\n");
+    voteBox.setEnabled(false);
+    nameField.setEditable(false);
+    ageField.setEditable(false);
+    voteButton.setEnabled(false);
+  }
+
+  public void results() {
+    clear();
+    ResultsDialog dialog = new ResultsDialog(bulletinBoard);
+    dialog.pack();
+    dialog.setVisible(true);
+    System.exit(0);
   }
 
   private String arrayToBlockString(BigInteger array[]) {
@@ -143,7 +158,7 @@ public class HumanGui {
    */
   private void $$$setupUI$$$() {
     contentPane = new JPanel();
-    contentPane.setLayout(new GridLayoutManager(3, 3, new Insets(5, 5, 5, 5), -1, -1));
+    contentPane.setLayout(new GridLayoutManager(4, 3, new Insets(5, 5, 5, 5), -1, -1));
     final JPanel panel1 = new JPanel();
     panel1.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
     contentPane.add(panel1, new GridConstraints(2, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -154,7 +169,7 @@ public class HumanGui {
     clearButton.setText("Clear");
     panel1.add(clearButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JScrollPane scrollPane1 = new JScrollPane();
-    panel1.add(scrollPane1, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 100), null, 0, false));
+    panel1.add(scrollPane1, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(400, 300), null, 0, false));
     debugResponseArea = new JTextArea();
     debugResponseArea.setEditable(false);
     scrollPane1.setViewportView(debugResponseArea);
@@ -176,6 +191,10 @@ public class HumanGui {
     contentPane.add(label3, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     voteBox = new JComboBox();
     contentPane.add(voteBox, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(180, -1), null, 0, false));
+    finishElectionButton = new JButton();
+    finishElectionButton.setEnabled(false);
+    finishElectionButton.setText("Finish Election");
+    contentPane.add(finishElectionButton, new GridConstraints(3, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
   }
 
   /**
