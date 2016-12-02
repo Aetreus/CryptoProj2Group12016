@@ -66,7 +66,7 @@ public class Voter {
   public BigInteger initZKP(int i){
     BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
     BigInteger NSquared = N.pow(2);
-    BigInteger g = N.add(BigInteger.ONE);
+    BigInteger g = electionBoard.publicEncryption[i].getPublicKey().getNPlusOne();
     do{
       zkpr = new BigInteger(N.bitLength(), random);
     }while(zkpr.compareTo(N) > 0);
