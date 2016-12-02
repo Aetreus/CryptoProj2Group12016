@@ -30,8 +30,9 @@ public class ElectionBoard {
 
   static {
     try {
-      random = SecureRandom.getInstanceStrong();
+      random = SecureRandom.getInstance("NativePRNGNonBlocking");
     } catch (NoSuchAlgorithmException e) {
+      System.err.println("Issue creating a secure RNG, using a normal one instead.");
       random=new Random();
     }
   }
