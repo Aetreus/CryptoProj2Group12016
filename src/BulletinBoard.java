@@ -20,12 +20,12 @@ public class BulletinBoard {
   public void acceptAndZKPVote(BigInteger[] signedVote, BigInteger[] encryptedVote, Voter voter) throws BulletinBoardError{
     for(int i = 0; i < encryptedVote.length; i++){
       if(!(signedVote[i].modPow(board.publicExponent,board.modulus).equals(encryptedVote[i]))){
-        throw new BulletinBoardError("Signature for segment " + i + " " + signedVote[i].modPow(board.publicExponent,board.modulus).toString() + " did not match encrypted vote " + encryptedVote[i].toString() + "\n");
+        throw new BulletinBoardError("Signature for segment " + i + " " + signedVote[i].modPow(board.publicExponent,board.modulus) + " did not match encrypted vote " + encryptedVote[i].toString() + "\n");
       }
     }
     for(int i = 0; i < encryptedVote.length; i++){
       BigInteger N = board.publicEncryption[i].getPublicKey().getN();
-      BigInteger NSquared = N.multiply(N);
+      BigInteger NSquared = N.pow(2);
       BigInteger g = N.add(BigInteger.ONE);
       for(int j = 0; j < CERTAINTY; j++){
         BigInteger u = voter.initZKP(i);
@@ -35,8 +35,9 @@ public class BulletinBoard {
         }while(e.compareTo(N) > 0);
         BigInteger v = voter.getZKPV(e,i);
         BigInteger w = voter.getZKPW(e,i);
-        if(!(g.modPow(v,NSquared).multiply(encryptedVote[i].modPow(e,NSquared)).multiply(w.modPow(N,NSquared)).equals(u))){
-          throw new BulletinBoardError("Failed ZKP, u = " + u.toString() + " g = " + g.toString() + " c = " + encryptedVote[i].toString() + " e = " + e.toString() + " w = " + w.toString() + " N = " + N.toString() + "\n");
+        BigInteger tmp=g.modPow(v,NSquared).multiply(encryptedVote[i].modPow(e,NSquared)).mod(NSquared).multiply(w.modPow(N,NSquared)).mod(NSquared);
+        if(!(tmp.equals(u))){
+          throw new BulletinBoardError("Failed ZKP, u = " + u + " g = " + g + " c = " + encryptedVote[i] + " e = " + e + " w = " + w + " N = " + N + "\n");
         }
       }
     }
