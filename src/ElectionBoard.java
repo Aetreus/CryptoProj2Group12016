@@ -38,7 +38,7 @@ public class ElectionBoard {
   }
 
   public ElectionBoard(String voterFile, String candidatesFile) throws NoSuchAlgorithmException, IOException {
-    try(BufferedReader fReader=new BufferedReader(new FileReader(voterFile))){
+    try(BufferedReader fReader=new BufferedReader(new FileReader(voterFile))){//Read in voters and candidates from given files
       String line;
       while((line=fReader.readLine())!=null&&!(line=line.trim()).isEmpty()){
         String[] split = line.split("\\s+");
@@ -58,13 +58,13 @@ public class ElectionBoard {
     candidates=Collections.unmodifiableList(tmp);
     keyHolders=new Paillier[candidates.size()];
     publicEncryption = new Paillier[candidates.size()];
-    for (int i = 0; i < candidates.size(); i++) {
-      keyHolders[i]=new Paillier(KeyGen.PaillierKey(128,random.nextLong()));
+    for (int i = 0; i < candidates.size(); i++) {//Generate Paillier keys for encryption
+      keyHolders[i]=new Paillier(KeyGen.PaillierKey(256,random.nextLong()));
       publicEncryption[i] = new Paillier(keyHolders[i].getPublicKey());
       System.out.println("Made key for candidate #"+i);
     }
-    KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-    kpg.initialize(512);
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");//Generate RSA key for blind signatures
+    kpg.initialize(2048);
     KeyPair kp = kpg.genKeyPair();
     RSAPublicKey rpuk = (RSAPublicKey)kp.getPublic();
     RSAPrivateKey rprk = (RSAPrivateKey)kp.getPrivate();
@@ -96,7 +96,7 @@ public class ElectionBoard {
   }
   
   public BigInteger[] decrypt(BigInteger[] vote, CountingAuthority.CAToken t) throws ElectionBoardError{
-    if(t == null){
+    if(t == null){//Checks that the CA token is valid and came from an instance of the CA class
       throw new ElectionBoardError("Invalid attempt to call decryption function");
     }
     BigInteger[] decryption = new BigInteger[vote.length];

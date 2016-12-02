@@ -26,12 +26,12 @@ public class BulletinBoard {
     if((encryptedVote.length != board.publicEncryption.length) || (signedVote.length != board.publicEncryption.length)){
       throw new BulletinBoardError("Received vote length and number of candidates did not match.( expected " + board.publicEncryption.length + " )\n");
     }
-    for(int i = 0; i < encryptedVote.length; i++){
+    for(int i = 0; i < encryptedVote.length; i++){//Check signatures are correct
       if(!(signedVote[i].modPow(board.publicExponent,board.modulus).equals(encryptedVote[i]))){
         throw new BulletinBoardError("Signature for segment " + i + " " + signedVote[i].modPow(board.publicExponent,board.modulus) + " did not match encrypted vote " + encryptedVote[i].toString() + "\n");
       }
     }
-    for(int i = 0; i < encryptedVote.length; i++){
+    for(int i = 0; i < encryptedVote.length; i++){//Run ZKP CERTAINTY times on each segment of the vote
       BigInteger N = board.publicEncryption[i].getPublicKey().getN();
       BigInteger NSquared = N.pow(2);
       BigInteger g = N.add(BigInteger.ONE);
@@ -54,7 +54,7 @@ public class BulletinBoard {
     votes.add(encryptedVote.clone());
   }
 
-  public List<List<BigInteger>> getVoteMatrix() {
+  public List<List<BigInteger>> getVoteMatrix() {//Convert to display format
     ArrayList<List<BigInteger>> matrix=new ArrayList<>();
     for(int i=0;i<votes.size();++i){
       ArrayList<BigInteger> row=new ArrayList<>(candidates.size());

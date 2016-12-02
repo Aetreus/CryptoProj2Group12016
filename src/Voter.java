@@ -32,7 +32,7 @@ public class Voter {
   public BigInteger[] encryptForBlindSign(BigInteger[] encryptedVote) {
     BigInteger[] obscuredVote = new BigInteger[encryptedVote.length];
     do{
-      r = new BigInteger(128,electionBoard.random);
+      r = new BigInteger(512,electionBoard.random);
     }while(!(r.gcd(electionBoard.modulus).equals(BigInteger.ONE)));
     r_inverse=r.modInverse(electionBoard.modulus);
     for(int i = 0; i < encryptedVote.length; i++){
@@ -43,7 +43,7 @@ public class Voter {
   
   public BigInteger[] encryptVote(BigInteger[] plaintextVote)  {
     plainVote = plaintextVote;
-    encryptRands=new BigInteger[plaintextVote.length];
+    encryptRands=new BigInteger[plaintextVote.length];//Store x for the ZKP stage
     BigInteger[] encryptedVote = new BigInteger[plaintextVote.length];
     for(int i = 0; i < plaintextVote.length; i++)  {
       BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
@@ -55,7 +55,7 @@ public class Voter {
     return encryptedVote;
   }
 
-  public BigInteger[] unBlindSignedVote(BigInteger[] blindSignedVote) {
+  public BigInteger[] unBlindSignedVote(BigInteger[] blindSignedVote) {//Reverse obscuration of the signature
     BigInteger[] signedVote = new BigInteger[blindSignedVote.length];
     for(int i = 0; i < blindSignedVote.length; i++){
       signedVote[i] = blindSignedVote[i].multiply(r_inverse).mod(electionBoard.modulus);
@@ -63,7 +63,7 @@ public class Voter {
     return signedVote;
   }
   
-  public BigInteger initZKP(int i){
+  public BigInteger initZKP(int i){//Calculates u and stores r and s
     BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
     BigInteger NSquared = N.pow(2);
     BigInteger g = electionBoard.publicEncryption[i].getPublicKey().getNPlusOne();

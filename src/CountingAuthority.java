@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 
 public class CountingAuthority {
-  public static final class CAToken { private CAToken() {} }
+  public static final class CAToken { private CAToken() {} }//Used to authenticate this class to the ElectionBoard
   private static final CAToken token = new CAToken();
   
   private ElectionBoard electionBoard;
