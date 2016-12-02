@@ -89,6 +89,17 @@ public class ElectionBoard {
     }
     return blindSignedVote;
   }
+  
+  public BigInteger[] decrypt(BigInteger[] vote, CountingAuthority.CAToken t) throws ElectionBoardError{
+    if(t == null){
+      throw new ElectionBoardError("Invalid attempt to call decryption function");
+    }
+    BigInteger[] decryption = new BigInteger[vote.length];
+    for(int i = 0; i < vote.length; i++){
+      decryption[i] = keyHolders[i].decrypt(vote[i]);
+    }
+    return decryption;
+  }
 
   private boolean voterHasAge(String voterName, int voterAge) {
     return voterAge==voters.get(voterName);

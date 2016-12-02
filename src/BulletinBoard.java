@@ -1,5 +1,6 @@
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -11,13 +12,20 @@ public class BulletinBoard {
   private static int CERTAINTY = 64;
   public final List<String> candidates;
   private ElectionBoard board;
+  ArrayList<BigInteger[]> votes;
+  
+  
   
   public BulletinBoard(ElectionBoard electionBoard) {
     board = electionBoard;
     candidates=board.candidates;
+    votes = new ArrayList<>();
   }
 
   public void acceptAndZKPVote(BigInteger[] signedVote, BigInteger[] encryptedVote, Voter voter) throws BulletinBoardError{
+    if((encryptedVote.length != board.publicEncryption.length) || (signedVote.length != board.publicEncryption.length)){
+      throw new BulletinBoardError("Received vote length and number of candidates did not match.( expected " + board.publicEncryption.length + " )\n");
+    }
     for(int i = 0; i < encryptedVote.length; i++){
       if(!(signedVote[i].modPow(board.publicExponent,board.modulus).equals(encryptedVote[i]))){
         throw new BulletinBoardError("Signature for segment " + i + " " + signedVote[i].modPow(board.publicExponent,board.modulus) + " did not match encrypted vote " + encryptedVote[i].toString() + "\n");
@@ -41,31 +49,24 @@ public class BulletinBoard {
         }
       }
     }
+    votes.add(encryptedVote.clone());
   }
 
   public List<List<BigInteger>> getVoteMatrix() {
-    //Todo return a row by row matrix of the accepted encrypted votes, using debug matrix for now
     ArrayList<List<BigInteger>> matrix=new ArrayList<>();
-    Random random=new Random();
-    for(int i=0;i<5;++i){
+    for(int i=0;i<votes.size();++i){
       ArrayList<BigInteger> row=new ArrayList<>(candidates.size());
+      BigInteger[] source = votes.get(i);
       for(int j=0;j<candidates.size();++j){
-        row.add(BigInteger.valueOf(random.nextLong()));
+        row.add(source[i]);
       }
       matrix.add(Collections.unmodifiableList(row));
     }
     return Collections.unmodifiableList(matrix);
   }
 
-  public BigInteger[] sendVotesToCountingAuthority() {
-    CountingAuthority authority =new CountingAuthority(board);
-    //TODO send all the votes to the authority which according to the project then sends the results to the EM, which should
-    //probably echo them back here to the public
-    BigInteger tmp[]=new BigInteger[candidates.size()];
-    Random random=new Random();
-    for(int i=0;i<candidates.size();++i){
-      tmp[i]=BigInteger.valueOf(random.nextLong());
-    }
-    return tmp;
+  public BigInteger[] sendVotesToCountingAuthority() throws ElectionBoardError {
+    CountingAuthority authority = new CountingAuthority(board);
+    return authority.combineVotes(votes);
   }
 }
