@@ -71,7 +71,7 @@ public class HumanGui {
     }
     debugResponseArea.append("Election Board successfully signed your vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
     BigInteger signedVote[] = voter.partiallyBlindSignedVote(blindSignedVote);
-    debugResponseArea.append("Decrypted your part of the blind signed vote as:\n" + arrayToBlockString(blindSignedVote) + "\n");
+    debugResponseArea.append("Decrypted your part of the blind signed vote as:\n" + arrayToBlockString(signedVote) + "\n");
     try {
       bulletinBoard.acceptAndZKPVote(signedVote, encryptedVote, voter);
     } catch (BulletinBoardError error) {
