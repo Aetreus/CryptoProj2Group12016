@@ -86,6 +86,6 @@ public class Voter {
   public BigInteger getZKPW(BigInteger e,int i){
     BigInteger N = electionBoard.publicEncryption[i].getPublicKey().getN();
     BigInteger NSquared = N.pow(2);
-    return zkps.multiply(encryptRands[i].modPow(e.modInverse(NSquared),NSquared)).mod(NSquared);
+    return zkps.multiply(encryptRands[i].modPow(e.negate(),NSquared)).mod(NSquared);
   }
 }
