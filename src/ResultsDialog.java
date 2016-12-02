@@ -63,12 +63,12 @@ public class ResultsDialog extends JDialog {
       }
     }
     voteTable.setValueAt("Totals:", voteMatrix.size(), 0);
-    try{
+    try {
       BigInteger[] bigIntegers = board.sendVotesToCountingAuthority();
       for (int i = 0; i < board.candidates.size(); i++) {
         voteTable.setValueAt(bigIntegers[i], voteMatrix.size(), i + 1);
       }
-    } catch(ElectionBoardError error){
+    } catch (ElectionBoardError error) {
       //TODO: Log errors during counting of votes
     }
   }
