@@ -10,6 +10,7 @@ public class Voter {
 
   private ElectionBoard electionBoard;
   private BigInteger r;
+  private BigInteger r_inverse;
   public static Random random;
   private BigInteger[] plainVote;
   private BigInteger[] encryptRands;
@@ -33,6 +34,7 @@ public class Voter {
     do{
       r = new BigInteger(128,electionBoard.random);
     }while(!(r.gcd(electionBoard.modulus).equals(BigInteger.ONE)));
+    r_inverse=r.modInverse(electionBoard.modulus);
     for(int i = 0; i < encryptedVote.length; i++){
       obscuredVote[i] = encryptedVote[i].multiply(r.modPow(electionBoard.publicExponent,electionBoard.modulus)).mod(electionBoard.modulus);
     }
@@ -53,10 +55,10 @@ public class Voter {
     return encryptedVote;
   }
 
-  public BigInteger[] partiallyBlindSignedVote(BigInteger[] blindSignedVote) {
+  public BigInteger[] unBlindSignedVote(BigInteger[] blindSignedVote) {
     BigInteger[] signedVote = new BigInteger[blindSignedVote.length];
     for(int i = 0; i < blindSignedVote.length; i++){
-      signedVote[i] = blindSignedVote[i].divide(r);
+      signedVote[i] = blindSignedVote[i].multiply(r_inverse).mod(electionBoard.modulus);
     }
     return signedVote;
   }
