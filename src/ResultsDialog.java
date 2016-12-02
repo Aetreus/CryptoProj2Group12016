@@ -57,7 +57,7 @@ public class ResultsDialog extends JDialog {
     };
     voteTable = new JTable(model);
     for (int i = 0; i < voteMatrix.size(); i++) {
-      voteTable.setValueAt(i, i, 0);
+      voteTable.setValueAt(i + 1, i, 0);
       for (int j = 0; j < voteMatrix.get(i).size(); j++) {
         voteTable.setValueAt(voteMatrix.get(i).get(j), i, j + 1);
       }

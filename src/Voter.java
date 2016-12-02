@@ -19,8 +19,9 @@ public class Voter {
   
   static {
     try {
-      random = SecureRandom.getInstanceStrong();
+      random = SecureRandom.getInstance("NativePRNGNonBlocking");
     } catch (NoSuchAlgorithmException e) {
+      System.err.println("Failure to get a secure random number generator.");
       random=new Random();
     }
   }
